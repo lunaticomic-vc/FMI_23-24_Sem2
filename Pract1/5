@@ -1,0 +1,36 @@
+#include <iostream>
+using std::cin;
+using std::cout;
+using std::endl;
+
+
+struct Student
+{
+	unsigned short grade;
+	char fn[10];
+	char firstName[20];
+	char lastName[30];
+};
+
+struct Group
+{
+	int numOfSt;
+	double avgGr;
+	Student* s = new Student[numOfSt];
+};
+
+void buildGroup(const size_t &numOfSt, Group& g)
+{
+	g.avgGr = 0;
+	for (size_t i = 0; i < numOfSt; i++)
+	{
+		cin >> g.s[i].grade >> g.s[i].fn >> g.s[i].firstName>> g.s[i].lastName;
+		g.avgGr += g.s[i].grade;
+	}
+	g.avgGr /= numOfSt;
+}
+
+int main()
+{
+
+}
