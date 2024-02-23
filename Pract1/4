@@ -1,0 +1,52 @@
+#include <iostream>
+using std::cin;
+using std::cout;
+using std::endl;
+
+struct Point
+{
+	int x;
+	int y;
+};
+
+void readPoint(Point &p)
+{
+	cin >> p.x >> p.y;
+}
+
+
+void printPoint(const Point& p)
+{
+	cout<< p.x << p.y << endl;
+}
+
+double findDistanceToZero(const Point& p)
+{
+	return sqrt(p.x*p.x + p.y*p.y);
+}
+
+double findDistance(const Point& a, const Point& b)
+{
+	return sqrt((a.x - b.x)* (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+
+unsigned short findQuadrant(const Point& p)
+{
+	if (p.x < 0)
+	{
+		if (p.y < 0)return 3;
+		else return 2;
+	}
+	else
+	{
+		if (p.y < 0)return 4;
+		else return 1;
+	}
+}
+
+bool isInCircle(double r, const Point& p)
+{
+	if (findDistanceToZero(p) < r || fabs(findDistanceToZero(p) - r) < DBL_EPSILON) return 1;
+	return 0;
+
+}
