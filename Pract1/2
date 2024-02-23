@@ -1,0 +1,26 @@
+
+#include <iostream>
+using std::cout;
+struct Complex
+{
+    int whole;
+    int imaginary;
+};
+
+Complex sumOfComplex(const Complex& a, const Complex& b)
+{
+    Complex sum;
+    sum.whole = a.whole + b.whole;
+    sum.imaginary = a.imaginary + b.imaginary;
+    return sum;
+}
+
+void printComplex(const Complex& a)
+{
+    cout << a.whole << "+ i*" << a.imaginary << endl;
+}
+
+int main()
+{
+
+}
