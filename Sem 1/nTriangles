@@ -1,0 +1,98 @@
+#include <iostream>
+
+using std::cin;
+using std::cout;
+using std::endl;
+using std::swap;
+
+struct Point
+{
+    int x;
+    int y;
+};
+
+struct Triangle
+{
+    Point a;
+    Point b;
+    Point c;
+};
+
+struct Sides
+{
+    double a;
+    double b;
+    double c;
+};
+
+Sides findSides(const Triangle& tri)
+{
+    Sides tr;
+    tr.a = sqrt((tri.b.x - tri.c.x) * (tri.b.x - tri.c.x) + (tri.b.y - tri.c.y) * (tri.b.y - tri.c.y));
+    tr.b = sqrt((tri.a.x - tri.c.x) * (tri.a.x - tri.c.x) + (tri.a.y - tri.c.y) * (tri.a.y - tri.c.y));
+    tr.c = sqrt((tri.a.x - tri.b.x) * (tri.a.x - tri.b.x) + (tri.b.y - tri.a.y) * (tri.b.y - tri.a.y));
+    return tr;
+}
+
+double findHalfPeri(const Sides& tr)
+{
+    return (tr.a + tr.b + tr.c) / 2;
+}
+
+double findArea(const Triangle& tr)
+{
+    Sides triSides = findSides(tr);
+    double hp = findHalfPeri(triSides);
+    return sqrt(hp * (hp - triSides.a) * (hp - triSides.b) * (hp - triSides.c));
+}
+
+void sortTriangles(Triangle* tr, size_t size)
+{
+    size_t minInd;
+    for (size_t i = 0; i < size; i++)
+    {
+        minInd = i;
+        for (size_t j = minInd; j < size; j++)
+        {
+            if (findArea(tr[minInd]) > findArea(tr[j]))minInd = j;
+        }
+        if (minInd != i)swap(tr[minInd], tr[i]);
+    }
+}
+
+void inputPoint(Point& a)
+{
+    cin >> a.x >> a.y;
+}
+
+void inputTriangle(Triangle& a)
+{
+    inputPoint(a.a);
+    inputPoint(a.b);
+    inputPoint(a.c);
+}
+
+void printTriangle(const Triangle &a)
+{
+    cout << "Ax: " << a.a.x << " Ay: " << a.a.y<<" Bx: " << a.b.x<< " By: "<< a.b.y << " Cx: " << a.c.x << " Cy: " << a.c.y << endl;
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+    Triangle* tr = new Triangle[n];
+    for (int i = 0; i < n; i++)
+    {
+        inputTriangle(tr[i]);
+    }
+
+    sortTriangles(tr, n);
+
+    for (int i = 0; i < n; i++)
+    {
+        printTriangle(tr[i]);
+    }
+
+    delete[] tr;
+}
