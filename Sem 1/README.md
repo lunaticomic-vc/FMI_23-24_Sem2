@@ -22,8 +22,7 @@ Big-endian - Най-старшият байт е на първа позиция,
 Проверката може да се извърши чрез побитова операция върху указател.
 
     	unsigned int num = 1;
-	// Check the least significant byte
-
+	//Check the least significant byte
 	if (*((char*)&num) == 1)
 	{
 		std::cout << "Little-endian" << std::endl;
