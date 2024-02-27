@@ -82,3 +82,61 @@ while(!ifs.eof())
     //...
   }
 ```
+# Режими на работа
+## Работа с поток за вход от файл (ifstream)
+```
+#include <iostream>
+#include <fstream>
+
+constexpr char FILE_NAME[] = "myFile.txt";
+
+int main() {
+   std::ifstream file(FILE_NAME); // create input file stream associated with myFile.txt
+
+   if (!file.is_open()) {
+   	std::cout << "Error!" << std::endl;
+   	return -1;
+   }
+   
+   int a, b;
+   file >> a >> b;
+
+   file.close();
+}
+```
+```
+#include <iostream>
+#include <fstream>
+
+constexpr int BUFF_SIZE = 1024;
+constexpr char FILE_NAME[] = "myFile.txt";
+
+int main() {
+   std::ifstream file(FILE_NAME);
+
+   if (!file.is_open()) {
+   	std::cout << "Error!" << std::endl;
+   	return -1;
+   }
+   while(true)
+  {
+    char p = ifs.get();
+    if(ifs.eof())break;
+    char buff[BUFF_SIZE];
+   	file.getline(buff, BUFF_SIZE);
+   	std::cout << buff << std::endl;
+  }   
+   file.close();
+}
+```
+## Работа с поток за изход към файл (ofstream)
+
+(istream) get - функция, която чете следващия character в потока.
+
+(ostream) put - функция, която поставя на следваща позиция character в потока.
+
+ifstream или istream - съдържа get указател, който реферира елемента, който ще се прочете при следващата входна операция.
+
+ofstream или ostream - съдържа put указател, който реферира мястото, където ще се запише следващият елемент.
+
+put и get не са форматирани за разлика от operator<< и operator>>, тоест не пропускат whitespaces и др.
