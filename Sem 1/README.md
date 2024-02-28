@@ -267,3 +267,79 @@ struct A {
 		else cout<<"Big endian"<<endl;
 	}
 ```
+
+## Семинар
+
+Constexpr - когато знаем стойността преди компилиране
+const - може да се сложи променлива
+
+```
+consexpr int MAX_SIZE = 4;
+const int a = 5;
+const int b = a;
+```
+
+Пример с IP address
+
+Коментар по задача:
+//GBP: Добра практика е да се използва неймспейс за събиране на функции в дадена категория
+//GBP: while(*str) //става равно на 0 при достигане на '\0'
+
+Условие: Модифициране на задача за превръщане на чар масив в ънсайнд число
+
+```
+namespace HelperFunctions {
+        bool isDigit(char ch){
+                return '0' <= ch && ch<='9';
+        }
+        unsigned getDigitFromChar (char ch)
+        {
+                return ch - '0';
+        }
+}
+
+enum class ErrorCode {
+        NoError,
+        NullptrProvided,
+        EmptyStringProvided,
+        StringIsNotANumber
+};
+
+struct ConversionResult {
+        ErrorCode errorCode;
+        unsigned result;
+}
+
+ConversionResult charToUnsignedInt (const char* str){
+        if (!str) {
+                return { ErrorCode::NullptrProvided, 0 };
+        }
+        if(!*str){
+                return { ErrorCode::EmptyStringProvided, 0 };
+        }
+        unsigned result = 0;
+        while(*str) //==0 pri '\0'
+        {
+                if(!HelperFunctions::isDigit(*str))
+                {
+                        return { ErrorCode::StringIsNotANumber, 0};
+                }
+                result *= 10;
+                result += HelperFunctions::getDigitFromChar(*str);
+                str++;
+        }
+        return {ErrorCode::NoError, result};
+}
+
+int main() {
+        //...
+        If(conversionResult.errorCode == ErrorCode::NoError)
+        {
+                //...
+        }
+        else {
+                //handle errors
+        }
+}
+
+```
