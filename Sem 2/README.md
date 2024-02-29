@@ -1,6 +1,8 @@
 Поток. Стандартни потоци. Текстови файлове. Йерархия на потоците. Интерфейс на потоци. Потоци за вход/изход от файл. Режими на работа. Флагове на състоянията на потока. Позициониране във файл. Пример за функция, която връща големината на файл. Пример за функция, която връща брой редове в текстов файл.
 
-//Belejka: V kakyl smisyl rejimi na rabota. V kakyv smisyl pozicionirane. V kakyv smisyl golemina na fail. To be continued
+//Belejka: V kakyl smisyl rejimi na rabota. - update: tva ne e rocket science ama ne sym sig napylno
+
+// V kakyv smisyl pozicionirane. V kakyv smisyl golemina na fail. - update: tva sa seekovete i tellovete no ne sym gi razpisala
 
 # Поток
 
