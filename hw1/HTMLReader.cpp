@@ -4,13 +4,16 @@
 #include <iomanip>
 #pragma warning(disable:4996)
 
+//comments included to explain algorithm
+
 namespace CONSTANTS
 {
     constexpr size_t MAX_ROW_COUNT = 100;
     constexpr size_t MAX_CELLS_PER_ROW = 15;
-    constexpr size_t MAX_CHARS_PER_CELL = 15;
+    constexpr size_t MAX_CHARS_PER_CELL = 50;
     constexpr size_t MAX_CHARS_BEFORE_DECODE = 200;
     constexpr int MAX_CHARS_TAG = 16;
+    constexpr int MAX_FILENAME = 100;
 }
 
 using namespace CONSTANTS;
@@ -239,16 +242,40 @@ void readInput(Table& table, const char* fileName)
     while (!ifs.eof())
     {
         g = ifs.get();
-        while (g == ' ' || g == '\n' || g == '\t')g = ifs.get();
+
+        while (g == ' ' || g == '\n' || g == '\t')
+        {
+            g = ifs.get();
+        }
+
         Tags curTag = getTag(ifs, g);
-        if (curTag == Tags::rowOp)fillRowWithCells(table, ifs, rowNum++);
+
+        if (curTag == Tags::rowOp)
+        {
+            fillRowWithCells(table, ifs, rowNum++);
+        }
     }
     ifs.close();
 }
 
-Row readRowContent(char* input)
+Row readRowContent(const char* input, unsigned &cols)
 {
+    int ind = 0, indBuf = 0, indRow = 0;
+    Row row;
+    do
+    {
+        indBuf = 0;
+        char buffer[MAX_CHARS_BEFORE_DECODE];
+        while (input[ind] != ',' && input[ind] != '\0')
+        {
+            buffer[indBuf++] = input[ind++];
+        }
+        buffer[indBuf] = '\0';
+        sstrcpy(row.col[indRow++].cell, buffer);
 
+    } while (input[ind] != '\0');
+    cols = --indRow;
+    return row;
 }
 
 void addRow(Table& table, size_t row, Row rowContent, size_t amountOfCols)
@@ -397,7 +424,7 @@ bool errorCapture()
     if (std::cin.fail())
     {
         std::cin.clear();
-        std::cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         errorMessage();
         return true;
     }
@@ -423,12 +450,25 @@ void menuOptions()
 
 int main()
 {
-    std::cout << "Please enter command" << std::endl;
+    Table table;
 
-    unsigned step = 1, ind;
+    std::cout << "Please enter filename" << std::endl;
+
+    char fileName[MAX_FILENAME];
+
+    std::cin >> fileName;
+
+    readInput(table, fileName);
+
+    unsigned step = 1, ind, colsBuff = 0, rowBuff=0;
+    char values[MAX_CHARS_BEFORE_DECODE];
+
+    std::cout << "Please enter command:" << std::endl;
 
     while (step)
     {
+        menuOptions();
+
         std::cin >> step;
 
         if (errorCapture())
@@ -444,62 +484,53 @@ int main()
             {
                 std::cout << "Please enter an index where the new row will be inserted";
                 std::cin >> ind;
-                std::cout << "Enter the row values, separated by a comma" << std::endl;
-
+                std::cout << "Enter the row values, separated by a comma until newline" << std::endl;
+                std::cin >> values;
+                
+                addRow(table, ind, readRowContent(values, colsBuff), colsBuff);
+                break;
 
             }
 
             case 2:
             {
-            
+                std::cout << "Please enter an index where the row will be removed";
+                std::cin >> ind;
+                removeRow(table, ind);
+                break;
             }
 
             case 3:
             {
+                std::cout << "Please enter row";
+                std::cin >> rowBuff;
+                std::cout << "Please enter column" << std::endl;
+                std::cin >> colsBuff;
+                std::cout << "Please enter new value of cell" << std::endl;
+                std::cin >> values;
+
+                editCell(values, table, rowBuff, colsBuff);
+                break;
 
             }
 
             case 4:
             {
+                printTable(table);
+                break;
+            }
+
+            default:
+            {
+                std::cout << "Please enter valid command" << std::endl;
+                continue;
 
             }
         }
     }
 
-    /*
-    char arr[] = "table.txt";
-    char arr1[] = "table111.txt";
-    char arr6[] = "table112.txt";
-
-    Table table;
-
-    readInput(table, arr);
-
-    printTable(table);
-
-    removeRow(table, 2);
-
-    Row row;
-    sstrcpy(row.col[0].cell, arr);
-    row.col[0].isFull = 1;
-    sstrcpy(row.col[1].cell, arr);
-    row.col[1].isFull = 1;
-    row.col[1].isHeader = 1;
-    sstrcpy(row.col[2].cell, arr1);
-    row.col[2].isFull = 1;
-    addRow(table, 2, row, 5);
-
-    char arr2[] = "pihski";
-    editCell(arr2, table, 1, 5);
-
-    printTable(table);
-    char arr3[] = "";
-    writeToFileFormatted(arr1, table);
-
-    editCell(arr3, table, 1, 5);
-    writeToFileFormatted(arr6, table);
-    */
-
-
+    writeToFileFormatted(fileName, table);
+    std::cout << "Thank you for using this program! Come again!" << std::endl;
     return 0;
+    
 }
