@@ -1,0 +1,101 @@
+#include <iostream>
+
+class MultiSet {
+private:
+    int* elements; // count of each element
+    int capacity; // maximum number of unique elements (0 to n-1)
+    static const int maxCount = 3; // max occurrences of each element
+
+public:
+    MultiSet(int n) : capacity(n) {
+        elements = new int[capacity](); 
+    }
+
+    ~MultiSet() {
+        delete[] elements; 
+    }
+
+    // Adds a number if it's valid and occurs less than 3 times
+    void add(int element) 
+    {
+        if (element >= 0 && element < capacity && elements[element] < maxCount) 
+        {
+            elements[element]++;
+        }
+    }
+
+    // Removes an occurrence of the number from the set if it's valid and contained
+    void remove(int element) 
+    {
+        if (element >= 0 && element < capacity && elements[element] > 0) 
+        {
+            elements[element]--;
+        }
+    }
+
+    // how many times the number occurs in the set
+    int count(int element) const 
+    {
+        if (element >= 0 && element < capacity) 
+        {
+            return elements[element];
+        }
+        return 0;
+    }
+
+    void print() const 
+    {
+        for (int i = 0; i < capacity; ++i) 
+        {
+            for (int j = 0; j < elements[i]; ++j) 
+            {
+                std::cout << i << " ";
+            }
+        }
+        std::cout << "\n";
+    }
+
+    int getCapacity() const 
+    { 
+        return capacity; 
+    }
+
+    void setElementCount(int element, int count) 
+    {
+        if (element >= 0 && element < capacity && count >= 0 && count <= maxCount) 
+        {
+            elements[element] = count; 
+        }
+    }
+};
+
+int main()
+{
+    MultiSet mySet(10);
+
+    mySet.add(2);
+    mySet.add(2);
+    mySet.add(5);
+    mySet.add(2); // third addition of 2
+    mySet.add(5); // adding 5 a second time
+
+    // Try adding a fourth 2, which should not increase the count due to the limit
+    mySet.add(2);
+
+    std::cout << "2 occurs " << mySet.count(2) << " times." << std::endl;
+    std::cout << "5 occurs " << mySet.count(5) << " times." << std::endl;
+
+    mySet.remove(2);
+
+    std::cout << "After removing one, 2 occurs " << mySet.count(2) << " times." << std::endl;
+
+    std::cout << "Current MultiSet: ";
+    mySet.print();
+
+    // Attempt to add and check an element outside the range (e.g., 15)
+    mySet.add(15); // should have no effect
+    std::cout << "15 occurs " << mySet.count(15) << " times. (should be 0)" << std::endl;
+
+    return 0;
+
+}
