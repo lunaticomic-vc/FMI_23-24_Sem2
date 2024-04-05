@@ -124,7 +124,7 @@ int main()
 
     // change the initial value of the series to 10 and the transition function to add 2
     series.setInitial(10);
-    series.setTransitionFunction([](int current) -> int { return current + 2; });
+    series.setTransitionFunction([](int current) -> int { return current + 2; }); //lambda funct, could be avoided but thought it didn't matter
 
     // generate the 5th number in the new series
     std::cout << "5th number in the new series: " << series.generateNumber(4) << std::endl;
