@@ -1,0 +1,143 @@
+#include <iostream>
+
+class NumberSeries {
+private:
+    int* series; // array to store generated numbers
+    int seriesSize; // size of the dynamic array
+    int currentCount; // count of numbers generated
+    int initial; // initial value of the series (a_0)
+    int (*transition)(int); // pointer to the transition function (a_i = f(a_{i-1}))
+
+public:
+
+    NumberSeries(int initial, int (*transitionFunc)(int)) : initial(initial), transition(transitionFunc) 
+    {
+        seriesSize = 10; // Initial size of the array
+        series = new int[seriesSize];
+        series[0] = initial; // Initialize series with the first value
+        currentCount = 1;
+    }
+
+    ~NumberSeries() {
+        delete[] series;
+    }
+
+    // the i-th number in the series
+    int generateNumber(int i) 
+    {
+        if (i < currentCount) 
+        {
+            return series[i]; // return the number if it's already generated
+        }
+
+        // generate missing numbers up to a_i
+        for (int j = currentCount; j <= i; ++j) 
+        {
+            // resize the array if necessary
+            if (j >= seriesSize) 
+            {
+                int newSize = seriesSize * 2;
+                int* newSeries = new int[newSize];
+
+                for (int k = 0; k < seriesSize; ++k) 
+                {
+                    newSeries[k] = series[k];
+                }
+                delete[] series;
+                series = newSeries;
+                seriesSize = newSize;
+            }
+            // transition function
+            series[j] = transition(series[j - 1]);
+        }
+        currentCount = i + 1;
+        return series[i];
+    }
+
+    // Check if a given number is part of the series
+    bool isPartOfSeries(int number) 
+    {
+        for (int i = 0; i < currentCount; ++i) 
+        {
+            if (series[i] == number) 
+            {
+                return true; 
+            }
+        }
+        return false;
+    }
+
+    int getInitial() const 
+    { 
+        return initial; 
+    }
+    int getCurrentCount() const 
+    { 
+        return currentCount; 
+    }
+
+    void setInitial(int newInitial) {
+        initial = newInitial;
+        resetSeries();
+    }
+
+    void setTransitionFunction(int (*newTransition)(int)) 
+    {
+        transition = newTransition;
+        resetSeries();
+    }
+
+private:
+    // resets the series
+    void resetSeries() 
+    {
+        delete[] series;
+        seriesSize = 10;
+        series = new int[seriesSize];
+        series[0] = initial;
+        currentCount = 1;
+    }
+};
+
+int nextInt(int current) 
+{
+    return current + 1;
+}
+
+int main()
+{
+    // create a NumberSeries starting from 5
+    NumberSeries series(5, nextInt);
+
+    // generate the 10th number in the series
+    std::cout << "10th number in the series: " << series.generateNumber(9) << std::endl;
+
+    // check if 15 is part of the series
+    if (series.isPartOfSeries(15)) 
+    {
+        std::cout << "15 is part of the series." << std::endl;
+    }
+    else 
+    {
+        std::cout << "15 is not part of the series." << std::endl;
+    }
+
+    // change the initial value of the series to 10 and the transition function to add 2
+    series.setInitial(10);
+    series.setTransitionFunction([](int current) -> int { return current + 2; });
+
+    // generate the 5th number in the new series
+    std::cout << "5th number in the new series: " << series.generateNumber(4) << std::endl;
+
+    // check if 18 is part of the new series
+    if (series.isPartOfSeries(18)) 
+    {
+        std::cout << "18 is part of the new series." << std::endl;
+    }
+    else 
+    {
+        std::cout << "18 is not part of the new series." << std::endl;
+    }
+
+    return 0;
+}
