@@ -3,16 +3,16 @@
 
 class MultiSet {
 private:
-    unsigned char* counts; // Масив за съхранение на брой пъти, които всяко число се среща
-    int maxNumber; // Най-голямото число в множеството
-    int maxCount; // Максимален брой срещания на едно число (2^k - 1)
+    unsigned char* counts; // Times each number is included
+    int maxNumber; // Biggest number
+    int maxCount; // (2^k - 1)
 
 public:
     MultiSet(int n, int k) {
         maxNumber = n;
         maxCount = (1 << k) - 1;
-        counts = new unsigned char[n + 1]; // Алокираме памет за n+1 числа
-        std::fill(counts, counts + n + 1, 0); // Инициализация на масива с 0
+        counts = new unsigned char[n + 1]; // allocate memory for n+1 numbers
+        std::fill(counts, counts + n + 1, 0); // fill array with zeroes
     }
 
     ~MultiSet() {
