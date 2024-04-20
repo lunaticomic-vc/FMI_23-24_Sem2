@@ -1,118 +1,147 @@
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
-class MultiSet {
-private:
-    unsigned char* counts; // Times each number is included
-    int maxNumber; // Biggest number
-    int maxCount; // (2^k - 1)
+class Multiset {
+    static const int BITS_IN_BYTE = 8;
+
+    unsigned char* set;
+    unsigned int n;
+    unsigned int k;
+    unsigned int arraySize;
+
+    int getByteIndex(unsigned int num) const {
+        return (num * k) / BITS_IN_BYTE;
+    }
+
+    int getBitOffset(unsigned int num) const {
+        return (num * k) % BITS_IN_BYTE;
+    }
+
+    unsigned char getOccurrence(unsigned int num) const {
+        if (num < 1 || num > n) {
+            throw std::out_of_range("Number out of range");
+        }
+
+        int byteIndex = getByteIndex(num);
+        int bitOffset = getBitOffset(num);
+        unsigned int bitsNeeded = k;
+        unsigned int result = 0;
+
+        while (bitsNeeded > 0) {
+            unsigned int bitsInThisByte = std::min(static_cast<unsigned int>(BITS_IN_BYTE - bitOffset), bitsNeeded);
+            unsigned int mask = (1 << bitsInThisByte) - 1;
+            unsigned int bits = (set[byteIndex] >> bitOffset) & mask;
+            result |= (bits << (k - bitsNeeded));
+            bitsNeeded -= bitsInThisByte;
+            bitOffset = 0;
+            byteIndex++;
+        }
+
+        return result;
+    }
+
+    void setOccurrence(unsigned int num, unsigned int count) {
+        if (num < 1 || num > n) {
+            throw std::out_of_range("Number out of range");
+        }
+
+        int byteIndex = getByteIndex(num);
+        int bitOffset = getBitOffset(num);
+        unsigned int bitsNeeded = k;
+
+        while (bitsNeeded > 0) {
+            unsigned int bitsInThisByte = std::min(static_cast<unsigned int>(BITS_IN_BYTE - bitOffset), bitsNeeded);
+            unsigned int mask = (1 << bitsInThisByte) - 1;
+            set[byteIndex] &= ~(mask << bitOffset);
+            set[byteIndex] |= ((count >> (k - bitsNeeded)) & mask) << bitOffset;
+            bitsNeeded -= bitsInThisByte;
+            bitOffset = 0;
+            byteIndex++;
+        }
+    }
 
 public:
-    MultiSet(int n, int k) {
-        maxNumber = n;
-        maxCount = (1 << k) - 1;
-        counts = new unsigned char[n + 1]; // allocate memory for n+1 numbers
-        std::fill(counts, counts + n + 1, 0); // fill array with zeroes
-    }
-
-    ~MultiSet() {
-        delete[] counts;
-    }
-
-    void add(int number) 
+    Multiset(unsigned int n, unsigned int k) : n(n), k(k) 
     {
-        if (number <= maxNumber && counts[number] < maxCount) 
-        {
-            counts[number]++;
+        if (k < 1 || k > 8) {
+            throw std::invalid_argument("k must be between 1 and 8");
+        }
+        arraySize = ((n * k) + BITS_IN_BYTE - 1) / BITS_IN_BYTE;
+        set = new unsigned char[arraySize]();
+    }
+
+    ~Multiset() {
+        delete[] set;
+    }
+
+    void addNumber(unsigned int num) {
+        unsigned int current = getOccurrence(num);
+        if (current < ((1 << k) - 1)) {
+            setOccurrence(num, current + 1);
+        }
+        else {
+            throw std::overflow_error("Maximum occurrences reached");
         }
     }
 
-    int count(int number) const 
-    {
-        if (number > maxNumber) return 0;
-        return counts[number];
+    unsigned char howManyOcc(unsigned int num) const {
+        return getOccurrence(num);
     }
 
-    void print() const 
-    {
-        for (int i = 0; i <= maxNumber; ++i) 
-        {
-            if (counts[i] > 0) 
-            {
-                std::cout << i << " appears " << (int)counts[i] << " times\n";
-            }
-        }
+    void serializeToBin(const std::string& fileName) const {
+        std::ofstream file(fileName, std::ios::binary);
+        file.write((char*)&n, sizeof(n));
+        file.write((char*)&k, sizeof(k));
+        file.write((char*)set, arraySize);
     }
 
-    void printRaw() const 
-    {
-        std::cout << "Memory representation:\n";
-      
-        for (int i = 0; i <= maxNumber; ++i) 
-        {
-            std::cout << (int)counts[i] << " ";
-        }
-        std::cout << "\n";
+    void deserializeFromBin(const std::string& fileName) {
+        std::ifstream file(fileName, std::ios::binary);
+        file.read((char*)&n, sizeof(n));
+        file.read((char*)&k, sizeof(k));
+        delete[] set;
+        arraySize = ((n * k) + BITS_IN_BYTE - 1) / BITS_IN_BYTE;
+        set = new unsigned char[arraySize]();
+        file.read((char*)set, arraySize);
     }
 
-    void serialize(const char* filename) const 
-    {
-        std::ofstream out(filename, std::ios::binary);
-      
-        if(out.is_open())
-        {
-          out.write((char*)counts, maxNumber + 1);
-          out.close();
+    void printMultiset() const {
+        for (unsigned int i = 1; i <= n; ++i) {
+            std::cout << i << ": " << static_cast<int>(howManyOcc(i)) << std::endl;
         }
-        else 
-            std::cout << "File issue"<< std::cout;
-    }
-
-    void deserialize(const char* filename) 
-    {
-        std::ifstream in(filename, std::ios::binary);
-
-       if(out.is_open())
-        {
-          in.read((char*)counts, maxNumber + 1);
-          in.close();
-        }
-        else 
-            std::cout << "File issue"<< std::cout;
-    }
-
-    MultiSet intersection(const MultiSet& other) const 
-    {
-        MultiSet result(maxNumber, std::min((int)log2(maxCount + 1), (int)log2(other.maxCount + 1)));
-      
-        for (int i = 0; i <= maxNumber; ++i) 
-        {
-            result.counts[i] = std::min(counts[i], other.counts[i]);
-        }
-      
-        return result;
-    }
-
-    MultiSet difference(const MultiSet& other) const 
-{
-        MultiSet result(maxNumber, std::min((int)log2(maxCount + 1), (int)log2(other.maxCount + 1)));
-  
-        for (int i = 0; i <= maxNumber; ++i) 
-        {
-            result.counts[i] = counts[i] > other.counts[i] ? counts[i] - other.counts[i] : 0;
-        }
-  
-        return result;
-    }
-
-    MultiSet complement() const 
-{
-        MultiSet result(maxNumber, std::min((int)log2(maxCount + 1), (int)log2(maxCount + 1)));
-  
-        for (int i = 0; i <= maxNumber; ++i) 
-        {
-            result.counts[i] = maxCount - counts[i];
-        }
-        return result;
     }
 };
+
+int main() {
+    try {
+        Multiset ms(10, 4);  // max 10 numbers, using 4 bits each
+        ms.addNumber(1);
+        ms.addNumber(1);
+        ms.addNumber(1);
+        ms.addNumber(1);
+        ms.addNumber(1);
+        ms.addNumber(1);
+        ms.addNumber(1);
+        ms.addNumber(1);
+        ms.addNumber(1);
+        ms.addNumber(1);
+        ms.addNumber(3);
+        ms.addNumber(3);
+        ms.addNumber(3);
+        ms.addNumber(3);
+        ms.addNumber(3);
+        ms.addNumber(3);
+        ms.addNumber(3);
+        ms.printMultiset();
+        ms.serializeToBin("multiset.bin");
+
+        Multiset ms2(10, 4);
+        ms2.deserializeFromBin("multiset.bin");
+        ms2.printMultiset();
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+    }
+    return 0;
+}
