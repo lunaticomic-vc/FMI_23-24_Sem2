@@ -1,3 +1,5 @@
+//TODO: remove min, max, fix constants, add binaryprint
+
 #include <iostream>
 #include <fstream>
 #include <algorithm>
